@@ -15,17 +15,37 @@
 
 ```
 portfolio-backend/
-├── main.go                    # アプリケーションエントリーポイント
-├── go.mod                     # Go モジュール定義
-├── Dockerfile                 # Docker イメージ定義
-├── docker-compose.yml         # 開発環境構成
-├── Makefile                   # ローカル開発用コマンド
-├── migrations/                # データベースマイグレーション
+├── cmd/
+│   ├── api/
+│   │   └── main.go           # API サーバーエントリーポイント
+│   └── worker/
+│       └── main.go           # ワーカーエントリーポイント
+├── internal/
+│   ├── graph/
+│   │   ├── schema.graphqls   # GraphQL スキーマ定義
+│   │   ├── resolver.go       # GraphQL リゾルバー実装
+│   │   ├── generated.go      # gqlgen 生成コード（自動生成）
+│   │   └── models_gen.go     # gqlgen 生成モデル（自動生成）
+│   ├── service/
+│   │   └── user_service.go   # ユーザービジネスロジック
+│   ├── repository/
+│   │   └── user_repository.go  # リポジトリインターフェース定義
+│   ├── model/
+│   │   └── user.go           # ドメインモデル
+│   ├── infrastructure/
+│   │   └── mysql/
+│   │       └── user_repository.go  # MySQL リポジトリ実装
+│   └── common/
+│       └── env.go            # 共通ユーティリティ
+├── migrations/
 │   └── 001_create_users_table.sql
-└── graph/                     # GraphQL関連ファイル
-    ├── schema.graphqls        # GraphQL スキーマ定義
-    ├── models.go              # データモデル
-    └── resolver.go            # GraphQL リゾルバー実装
+├── .env.example              # 環境変数サンプル
+├── gqlgen.yml                # gqlgen 設定
+├── go.mod                    # Go モジュール定義
+├── Dockerfile                # Docker イメージ定義
+├── docker-compose.yml        # 開発環境構成
+├── Makefile                  # ローカル開発用コマンド
+└── README.md
 ```
 
 ## セットアップ
@@ -39,6 +59,10 @@ portfolio-backend/
 
 ```bash
 cd portfolio-backend
+
+# 環境変数ファイルを用意
+cp .env.example .env
+# 必要に応じて .env を編集
 
 # コンテナを起動してデータベースをセットアップ
 make up
@@ -80,6 +104,12 @@ make logs
 
 ```bash
 make ps
+```
+
+### GraphQL コード再生成
+
+```bash
+make generate
 ```
 
 ## GraphQL API

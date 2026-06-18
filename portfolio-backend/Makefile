@@ -1,12 +1,13 @@
-.PHONY: help up down stop
+.PHONY: help up down stop generate
 
 help:
 	@echo "Available commands:"
-	@echo "  make up       - Start Docker containers and run database migrations"
-	@echo "  make down     - Stop and remove all containers (including volumes)"
-	@echo "  make stop     - Stop containers without removing them"
-	@echo "  make logs     - View container logs"
-	@echo "  make clean    - Remove all containers and volumes"
+	@echo "  make up         - Start Docker containers and run database migrations"
+	@echo "  make down       - Stop and remove all containers (including volumes)"
+	@echo "  make stop       - Stop containers without removing them"
+	@echo "  make logs       - View container logs"
+	@echo "  make clean      - Remove all containers and volumes"
+	@echo "  make generate   - Regenerate GraphQL code from schema"
 
 up:
 	@echo "Starting Docker containers..."
@@ -35,3 +36,8 @@ clean: down
 
 ps:
 	docker-compose ps
+
+generate:
+	@echo "Regenerating GraphQL code..."
+	go run github.com/99designs/gqlgen generate
+	@echo "✓ GraphQL code regenerated"

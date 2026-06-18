@@ -33,7 +33,8 @@ Thumbds.db
 .env.local
 
 # Build output
-app
+api
+worker
 dist/
 
 # GraphQL generated files

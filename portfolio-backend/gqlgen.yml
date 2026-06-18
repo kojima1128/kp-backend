@@ -1,0 +1,41 @@
+# Where are all the schema files using glob patterns
+schema:
+  - internal/graph/*.graphqls
+
+# Where should the generated server code go
+exec:
+  filename: internal/graph/generated.go
+  package: graph
+
+# Where should any generated models go
+model:
+  filename: internal/graph/models_gen.go
+  package: graph
+
+# Where should the resolver implementations go
+resolver:
+  layout: single-file
+  filename: internal/graph/resolver.go
+  package: graph
+  type: Resolver
+
+# Allow user to autobind to existing go types
+autobind:
+  - "github.com/kojima1128/portfolio-backend/internal/graph"
+
+# This section declares type mapping between the GraphQL and go type systems
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+      - github.com/99designs/gqlgen/graphql.String
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Float:
+    model:
+      - github.com/99designs/gqlgen/graphql.FloatContext
