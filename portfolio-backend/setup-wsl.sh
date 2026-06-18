@@ -108,7 +108,8 @@ echo ""
 
 # Navigate to portfolio-backend directory
 print_step "Navigating to portfolio-backend directory..."
-cd "$(dirname "$0")/portfolio-backend"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR"
 print_success "Current directory: $(pwd)"
 echo ""
 

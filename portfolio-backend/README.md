@@ -5,28 +5,61 @@
 ## 技術スタック
 
 - **言語**: Go 1.21
-- **API**: GraphQL
+- **API**: GraphQL (gqlgen)
 - **開発環境**: Docker Compose
 - **ローカルDB**: MySQL 8.0
 - **本番環境**: AWS ECS + Amazon Aurora
 - **オーケストレーション**: Makefile
 
-## プロジェクト構成
+## ディレクトリ構成
 
 ```
 portfolio-backend/
-├── main.go                    # アプリケーションエントリーポイント
-├── go.mod                     # Go モジュール定義
-├── Dockerfile                 # Docker イメージ定義
-├── docker-compose.yml         # 開発環境構成
-├── Makefile                   # ローカル開発用コマンド
-├── migrations/                # データベースマイグレーション
+├── cmd/
+│   ├── api/
+│   │   └── main.go          # APIサーバーのエントリーポイント
+│   └── worker/
+│       └── main.go          # ワーカーのエントリーポイント
+├── internal/
+│   ├── graph/
+│   │   ├── generated.go     # gqlgen生成コード（自動生成）
+│   │   ├── models_gen.go    # gqlgen生成モデル（自動生成）
+│   │   ├── resolver.go      # リゾルバー依存注入
+│   │   ├── schema.graphqls  # GraphQLスキーマ定義
+│   │   └── schema.resolvers.go  # リゾルバー実装
+│   ├── service/
+│   │   └── user_service.go  # ユーザービジネスロジック（API・ワーカー共通）
+│   ├── repository/
+│   │   └── user_repository.go  # リポジトリインターフェース（API・ワーカー共通）
+│   ├── model/
+│   │   └── user.go          # ドメインモデル
+│   ├── infrastructure/
+│   │   └── mysql/
+│   │       └── user_repository.go  # MySQL実装
+│   └── common/
+│       └── env.go           # 共通ヘルパー関数
+├── migrations/
 │   └── 001_create_users_table.sql
-└── graph/                     # GraphQL関連ファイル
-    ├── schema.graphqls        # GraphQL スキーマ定義
-    ├── models.go              # データモデル
-    └── resolver.go            # GraphQL リゾルバー実装
+├── .env.example             # 環境変数テンプレート
+├── .gitignore
+├── Dockerfile               # APIサーバー用Dockerイメージ
+├── docker-compose.yml       # ローカル開発環境構成
+├── gqlgen.yml               # gqlgen設定
+├── Makefile                 # ローカル開発用コマンド
+└── README.md
 ```
+
+### 層の役割
+
+| 層 | ディレクトリ | 説明 |
+|---|---|---|
+| エントリーポイント | `cmd/api`, `cmd/worker` | API・ワーカー各サーバーの起動 |
+| GraphQL | `internal/graph` | スキーマ・リゾルバー実装 |
+| サービス | `internal/service` | ビジネスロジック（API・ワーカー共通） |
+| リポジトリ | `internal/repository` | DBアクセスインターフェース（共通） |
+| モデル | `internal/model` | ドメインモデル定義 |
+| インフラ | `internal/infrastructure/mysql` | MySQL実装 |
+| 共通 | `internal/common` | 汎用ヘルパー関数 |
 
 ## セットアップ
 
@@ -40,9 +73,14 @@ portfolio-backend/
 ```bash
 cd portfolio-backend
 
+# .env ファイルを作成（テンプレートをコピー）
+cp .env.example .env
+
 # コンテナを起動してデータベースをセットアップ
 make up
 ```
+
+`make up` は初回実行時に `.env` が存在しない場合、`.env.example` から自動的にコピーします。
 
 これにより以下が自動実行されます：
 1. MySQL と Go アプリケーションコンテナが起動
@@ -50,37 +88,47 @@ make up
 3. `users` テーブルが作成
 4. アプリケーションが `http://localhost:8080` で起動
 
+### WSL (Windows) でのセットアップ
+
+Windows の WSL2 Ubuntu 環境でセットアップする場合：
+
+```bash
+# practice リポジトリをクローン
+git clone https://github.com/kojima1128/practice.git
+cd practice/portfolio-backend
+
+# セットアップスクリプトを実行（WSL Ubuntu ターミナルで）
+chmod +x setup-wsl.sh
+./setup-wsl.sh
+```
+
+詳細は [WSL-SETUP.md](../WSL-SETUP.md) を参照してください。
+
+## 環境変数
+
+`.env.example` を参考に `.env` を作成してください（`.env` はGit管理外）。
+
+| 変数名 | デフォルト値 | 説明 |
+|---|---|---|
+| `PORT` | `8080` | APIサーバーのポート |
+| `DB_HOST` | `db` | DBホスト名 |
+| `DB_PORT` | `3306` | DBポート |
+| `DB_USER` | `user` | DBユーザー名 |
+| `DB_PASSWORD` | `password` | DBパスワード |
+| `DB_NAME` | `common_db` | DB名 |
+| `WORKER_INTERVAL` | `60s` | ワーカー実行間隔 |
+
 ## コマンド
 
-### コンテナ起動（マイグレーション実行）
-
-```bash
-make up
-```
-
-### コンテナ停止（ボリューム削除）
-
-```bash
-make down
-```
-
-### コンテナ停止（ボリューム保持）
-
-```bash
-make stop
-```
-
-### ログ表示
-
-```bash
-make logs
-```
-
-### コンテナ状態確認
-
-```bash
-make ps
-```
+| コマンド | 説明 |
+|---|---|
+| `make up` | コンテナ起動・マイグレーション実行 |
+| `make down` | コンテナ停止・ボリューム削除 |
+| `make stop` | コンテナ停止（ボリューム保持） |
+| `make logs` | コンテナログ表示 |
+| `make ps` | コンテナ状態確認 |
+| `make build` | APIバイナリをローカルビルド |
+| `make generate` | GraphQLコード再生成 |
 
 ## GraphQL API
 
@@ -154,11 +202,6 @@ mysql -h localhost -u user -p -D common_db
 # パスワード: password
 ```
 
-### 本番環境（Amazon Aurora MySQL）
-
-本番環境では AWS RDS の Aurora MySQL を使用します。
-接続情報は環境変数で設定します。
-
 ## マイグレーション
 
 マイグレーション SQL ファイルは `migrations/` ディレクトリに配置します。
@@ -170,35 +213,23 @@ mysql -h localhost -u user -p -D common_db
 2. `make down` を実行してボリュームを削除
 3. `make up` を実行してマイグレーションを再実行
 
-## トラブルシューティング
+## GraphQL コード生成
 
-### コンテナが起動しない場合
-
-```bash
-# ログ確認
-make logs
-
-# コンテナ強制削除
-docker-compose down -v
-make up
-```
-
-### データベース接続エラー
+スキーマを変更した場合は `make generate` でコードを再生成してください。
 
 ```bash
-# MySQL が起動するまで待機時間を増やす
-# docker-compose.yml の healthcheck の retries を調整
+# スキーマ変更後
+make generate
 ```
 
 ## 次のステップ
 
-- [ ] 実際のデータベース接続実装
-- [ ] GraphQL リゾルバーの実装
+- [ ] MySQL リポジトリの実装 (`internal/infrastructure/mysql/`)
+- [ ] ワーカージョブの実装 (`cmd/worker/`)
 - [ ] ユーザー認証機能
 - [ ] エラーハンドリング
 - [ ] ロギング機構
 - [ ] ユニットテスト
-- [ ] インテグレーションテスト
 - [ ] 本番環境へのデプロイメント（ECS + Aurora）
 
 ## ライセンス

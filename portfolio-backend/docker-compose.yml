@@ -26,18 +26,11 @@ services:
     container_name: portfolio-app
     ports:
       - "8080:8080"
-    environment:
-      PORT: 8080
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_USER: user
-      DB_PASSWORD: password
-      DB_NAME: common_db
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - .:/app
 
 volumes:
   db_data:

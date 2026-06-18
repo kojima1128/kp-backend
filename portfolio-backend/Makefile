@@ -1,14 +1,17 @@
-.PHONY: help up down stop
+.PHONY: help up down stop logs ps build generate
 
 help:
 	@echo "Available commands:"
-	@echo "  make up       - Start Docker containers and run database migrations"
-	@echo "  make down     - Stop and remove all containers (including volumes)"
-	@echo "  make stop     - Stop containers without removing them"
-	@echo "  make logs     - View container logs"
-	@echo "  make clean    - Remove all containers and volumes"
+	@echo "  make up        - Start Docker containers and run database migrations"
+	@echo "  make down      - Stop and remove all containers (including volumes)"
+	@echo "  make stop      - Stop containers without removing them"
+	@echo "  make logs      - View container logs"
+	@echo "  make ps        - Show container status"
+	@echo "  make build     - Build the API binary locally"
+	@echo "  make generate  - Regenerate GraphQL code from schema"
 
 up:
+	@if [ ! -f .env ]; then cp .env.example .env; echo "Created .env from .env.example"; fi
 	@echo "Starting Docker containers..."
 	docker-compose up -d
 	@echo "Waiting for database to be ready..."
@@ -30,8 +33,11 @@ stop:
 logs:
 	docker-compose logs -f
 
-clean: down
-	@echo "Cleanup complete"
-
 ps:
 	docker-compose ps
+
+build:
+	go build -o api ./cmd/api
+
+generate:
+	go run github.com/99designs/gqlgen generate
