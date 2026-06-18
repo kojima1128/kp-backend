@@ -4,7 +4,7 @@
 
 ## 技術スタック
 
-- **言語**: Go 1.21
+- **言語**: Go 1.25
 - **API**: GraphQL (gqlgen)
 - **開発環境**: Docker Compose
 - **ローカルDB**: MySQL 8.0
