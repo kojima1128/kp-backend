@@ -4,6 +4,8 @@ services:
   db:
     image: mysql:8.0
     container_name: db
+    env_file:
+      - .env
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: common_db
@@ -24,15 +26,10 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: portfolio-app
+    env_file:
+      - .env
     ports:
       - "8080:8080"
-    environment:
-      PORT: 8080
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_USER: user
-      DB_PASSWORD: password
-      DB_NAME: common_db
     depends_on:
       db:
         condition: service_healthy
