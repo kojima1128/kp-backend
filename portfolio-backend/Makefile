@@ -1,7 +1,8 @@
-.PHONY: help up down stop logs clean ps build generate
+.PHONY: help env up down stop logs clean ps build generate
 
 help:
 	@echo "Available commands:"
+	@echo "  make env      - Run WSL environment setup script"
 	@echo "  make up       - Start Docker containers and run database migrations"
 	@echo "  make down     - Stop and remove all containers (including volumes)"
 	@echo "  make stop     - Stop containers without removing them"
@@ -10,6 +11,9 @@ help:
 	@echo "  make ps       - Show container status"
 	@echo "  make build    - Build local binaries"
 	@echo "  make generate - Run gqlgen"
+
+env:
+	bash setup-wsl.sh
 
 up:
 	@[ -f .env ] || cp .env.example .env
@@ -30,7 +34,7 @@ ps:
 	docker-compose ps
 
 build:
-	cd portfolio-backend && go build ./cmd/api && go build ./cmd/worker
+	go build ./cmd/api && go build ./cmd/worker
 
 generate:
-	cd portfolio-backend && go generate ./...
+	go generate ./...

@@ -1,13 +1,13 @@
-FROM golang:1.24-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
 RUN apk add --no-cache git
 
-COPY portfolio-backend/go.mod portfolio-backend/go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download
 
-COPY portfolio-backend/ .
+COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/api ./cmd/api
 
 FROM alpine:latest

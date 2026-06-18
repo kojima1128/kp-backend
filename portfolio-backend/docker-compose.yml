@@ -33,8 +33,19 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - .:/app
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_USER: user
+      PMA_PASSWORD: password
+    ports:
+      - "8081:80"
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   db_data:
