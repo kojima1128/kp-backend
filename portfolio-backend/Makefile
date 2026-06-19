@@ -1,7 +1,8 @@
-.PHONY: help up down stop logs clean ps build generate_gql
+.PHONY: help env up down stop logs clean ps build generate_gql
 
 help:
 	@echo "Available commands:"
+	@echo "  make env           - Setup environment (copy .env-sample to .env)"
 	@echo "  make up            - Start Docker containers and run database migrations"
 	@echo "  make down          - Stop and remove all containers (including volumes)"
 	@echo "  make stop          - Stop containers without removing them"
@@ -11,8 +12,11 @@ help:
 	@echo "  make build         - Build local binaries"
 	@echo "  make generate_gql  - Run gqlgen for GraphQL code generation"
 
-up:
-	@[ -f .env ] || cp .env.example .env
+env:
+	@[ -f .env ] || cp .env-sample .env
+	@echo "✓ .env file created from .env-sample"
+
+up: env
 	docker-compose up -d --build
 
 down:
