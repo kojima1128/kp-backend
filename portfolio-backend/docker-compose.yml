@@ -40,6 +40,9 @@ services:
     container_name: portfolio-app
     env_file:
       - .env
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
     ports:
       - "8080:8080"
     depends_on:

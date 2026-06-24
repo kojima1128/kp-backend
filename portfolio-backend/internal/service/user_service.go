@@ -24,6 +24,17 @@ func (s *UserService) ListUsers(ctx context.Context) ([]*model.User, error) {
 }
 
 func (s *UserService) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
-	user := &model.User{Name: input.Name, Email: input.Email}
+	role := input.Role
+	if role == "" {
+		role = "user"
+	}
+	user := &model.User{
+		CognitoID: input.CognitoID,
+		Name:      input.Name,
+		TenantID:  input.TenantID,
+		SiteID:    input.SiteID,
+		Role:      role,
+		Email:     input.Email,
+	}
 	return user, s.repo.Create(ctx, user)
 }

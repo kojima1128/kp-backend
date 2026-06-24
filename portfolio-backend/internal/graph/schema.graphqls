@@ -9,13 +9,21 @@ type Mutation {
 
 type User {
   id: ID!
+  cognitoId: String!
   name: String!
+  tenantId: String!
+  siteId: String!
+  role: String!
   email: String!
   createdAt: String!
   updatedAt: String!
 }
 
 input CreateUserInput {
+  cognitoId: String!
   name: String!
+  tenantId: String!
+  siteId: String!
+  role: String
   email: String!
 }
