@@ -13,8 +13,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/kojima1128/portfolio-backend/internal/common"
 	"github.com/kojima1128/portfolio-backend/internal/graph"
-	"github.com/kojima1128/portfolio-backend/internal/model"
-	"github.com/kojima1128/portfolio-backend/internal/repository"
+	"github.com/kojima1128/portfolio-backend/internal/infrastructure"
+	mysqlrepo "github.com/kojima1128/portfolio-backend/internal/infrastructure/mysql"
 	"github.com/kojima1128/portfolio-backend/internal/service"
 )
 
@@ -23,7 +23,8 @@ const defaultPort = "8080"
 func main() {
 	port := common.GetEnv("PORT", defaultPort)
 
-	userRepo := repository.NewUserRepository()
+	db := infrastructure.NewDB()
+	userRepo := mysqlrepo.NewUserRepository(db)
 	userService := service.NewUserService(userRepo)
 	resolver := graph.NewResolver(userService)
 
